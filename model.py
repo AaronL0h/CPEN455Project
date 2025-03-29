@@ -84,20 +84,25 @@ class PixelCNN(nn.Module):
         self.upsize_ul_stream = nn.ModuleList([down_right_shifted_deconv2d(nr_filters,
                                                     nr_filters, stride=(2,2)) for _ in range(2)])
 
-        self.u_init = down_shifted_conv2d(input_channels + 1, nr_filters, filter_size=(2,3),
-                        shift_output_down=True)
-
-        self.ul_init = nn.ModuleList([down_shifted_conv2d(input_channels + 1, nr_filters,
-                                            filter_size=(1,3), shift_output_down=True),
-                                       down_right_shifted_conv2d(input_channels + 1, nr_filters,
-                                            filter_size=(2,1), shift_output_right=True)])
+        self.u_init = down_shifted_conv2d(input_channels + 1 + input_channels, nr_filters, filter_size=(2, 3),
+                                        shift_output_down=True)
+        self.ul_init = nn.ModuleList([down_shifted_conv2d(input_channels + 1 + input_channels, nr_filters,
+                                                        filter_size=(1, 3), shift_output_down=True),
+                                    down_right_shifted_conv2d(input_channels + 1 + input_channels, nr_filters,
+                                                                filter_size=(2, 1), shift_output_right=True)])
 
         num_mix = 3 if self.input_channels == 1 else 10
         self.nin_out = nin(nr_filters, num_mix * nr_logistic_mix)
         self.init_padding = None
+        self.class_embedding = nn.Embedding(4, input_channels)
 
 
-    def forward(self, x, sample=False):
+    def forward(self, x, class_labels, sample=False):
+        # Expand class embeddings to match input spatial dimensions
+        class_embed = self.class_embedding(class_labels)  # (batch, input_channels)
+        class_embed = class_embed.unsqueeze(-1).unsqueeze(-1)  # (batch, input_channels, 1, 1)
+        class_embed = class_embed.expand(-1, -1, x.shape[2], x.shape[3])  # (batch, input_channels, H, W)
+        x = torch.cat((x, class_embed), dim=1)  # Concatenate along channels
         # similar as done in the tf repo :
         if self.init_padding is not sample:
             xs = [int(y) for y in x.size()]
