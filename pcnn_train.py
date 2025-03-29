@@ -25,7 +25,7 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
     
     for batch_idx, item in enumerate(tqdm(data_loader)):
         model_input, class_labels = item  # Extract class labels
-        label_map = {'Class0': 0, 'Class1': 1, 'Class2': 2, 'Class3': 3, 0:0, 1:1, 2:2, 3:3}
+        label_map = {'Class0': 0, 'Class1': 1, 'Class2': 2, 'Class3': 3, 'Unknown':0}
         class_labels = [label_map[class_labels] for class_labels in class_labels]
         class_labels = torch.tensor(class_labels).to(device)
         model_input = model_input.to(device)
@@ -125,7 +125,7 @@ if __name__ == '__main__':
     #Reminder: if you have patience to read code line by line, you should notice this comment. here is the reason why we set num_workers to 0:
     #In order to avoid pickling errors with the dataset on different machines, we set num_workers to 0.
     #If you are using ubuntu/linux/colab, and find that loading data is too slow, you can set num_workers to 1 or even bigger.
-    kwargs = {'num_workers':0, 'pin_memory':True, 'drop_last':True}
+    kwargs = {'num_workers':-1, 'pin_memory':True, 'drop_last':True}
 
     # set data
     if "mnist" in args.dataset:
