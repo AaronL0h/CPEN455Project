@@ -100,7 +100,7 @@ class PixelCNN(nn.Module):
     def forward(self, x, class_labels, sample=False):
         # Expand class embeddings to match input spatial dimensions
         class_embed = self.class_embedding(class_labels)  # (batch, input_channels)
-        class_embed = class_embed.unsqueeze(-1).unsqueeze(-1)  # (batch, input_channels, 1, 1)
+        class_embed = class_embed.squeeze(1)  # Remove the extra dimension (batch_size, input_channels, 1, 1)
         class_embed = class_embed.expand(-1, -1, x.shape[2], x.shape[3])  # (batch, input_channels, H, W)
         x = torch.cat((x, class_embed), dim=1)  # Concatenate along channels
         # similar as done in the tf repo :
