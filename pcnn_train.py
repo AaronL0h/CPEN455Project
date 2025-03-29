@@ -25,11 +25,7 @@ def train_or_test(model, data_loader, optimizer, loss_op, device, args, epoch, m
     
     for batch_idx, item in enumerate(tqdm(data_loader)):
         model_input, class_labels = item  # Extract class labels
-        print("Unique class labels:", set(class_labels))  # Helps debug unexpected labels
-        label_map = {'Class0': 0, 'Class1': 1, 'Class2': 2, 'Class3': 3}
-        class_labels = [label_map[label] for label in class_labels]
         class_labels = torch.tensor(class_labels).to(device)
-        print(class_labels)
         model_input = model_input.to(device)
         model_output = model(model_input, class_labels)
         loss = loss_op(model_input, model_output)
