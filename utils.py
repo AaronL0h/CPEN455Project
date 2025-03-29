@@ -180,8 +180,7 @@ def sample(model, sample_batch_size, obs, sample_op):
         data = torch.zeros(sample_batch_size, obs[0], obs[1], obs[2])
         data = data.to(next(model.parameters()).device)
 
-        dummy_condition = torch.ones(sample_batch_size, 1)  # Example: Gaussian noise
-        dummy_condition = dummy_condition.to(data.device)  # Ensure same device
+        dummy_condition = torch.ones(sample_batch_size, 1, dtype=torch.long, device=data.device)
 
         for i in range(obs[1]):
             for j in range(obs[2]):
